@@ -1,18 +1,17 @@
 {
     "compilerOptions": {
         "outDir": "dist",
-        "module": "esnext",
-        "target": "ES2024",
+        "module": "ES2022",
+        "target": "ES2022",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "allowJs": true,
         "noImplicitAny": true,
-        "resolveJsonModule": true,
         "isolatedModules": true,
         "lib": [
-            "ES2024",
+            "ES2022",
             "DOM"
         ]
     },

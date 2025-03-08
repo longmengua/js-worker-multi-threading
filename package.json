@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx tsx src/index.ts"
+    "dev": "npx tsc & node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "engines": {
+    "node": "~22"
+  },
   "devDependencies": {
     "@types/node": "^22.13.10",
     "typescript": "^5.8.2"
