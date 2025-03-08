@@ -1,5 +1,4 @@
 import { parentPort, workerData } from 'worker_threads';
-import { sleep } from '../utils/sleep';
 
 const { name, raceLength, sharedBuffer } = workerData;
 const raceOverFlag = new Int32Array(sharedBuffer);
@@ -19,3 +18,7 @@ let distance = 0;
 
     sleep(100).then(run); // 模擬跑步時間
 })();
+
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

@@ -12,9 +12,9 @@ const raceOverFlag = new Int32Array(sharedBuffer);
 raceOverFlag[0] = 0; // 初始化比賽結束標誌
 
 const horses = [
-    { name: '黑風' },
-    { name: '風暴' },
-    { name: '閃電' }
+    { name: 'Ａ' },
+    { name: 'Ｂ' },
+    { name: 'Ｃ' }
 ];
 
 console.log("🏁 比賽開始！");
@@ -25,11 +25,17 @@ horses.forEach(horse => {
     });
 
     worker.on('message', (message) => {
-        if (message.winner) {
-            console.log(`🏆 ${message.winner} 贏得比賽！`);
+        const { name, distance } = message;
+
+        if (Atomics.load(raceOverFlag, 0) === 1) {
+            return; // 比賽已經結束
+        }
+
+        if (distance == 100) {
+            console.log(`🏆 ${name} 贏得比賽！`);
             Atomics.store(raceOverFlag, 0, 1); // 設置比賽結束標誌
         } else {
-            console.log(`🚀 ${message.name} 跑了 ${message.distance} 公尺`);
+            console.log(`🚀 ${name} 跑了 ${distance} 公尺`);
         }
     });
 
