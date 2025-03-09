@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx tsc & node dist/index.js"
+    "build": "esbuild src/index.ts src/workers/hourseRace.ts --outdir=dist --platform=node --format=esm",
+    "build:watch": "esbuild src/index.ts src/workers/hourseRace.ts --outdir=dist --platform=node --format=esm",
+    "start": "node dist/index.js",
+    "dev": "npm run build:watch && npm run start"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +17,6 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
-    "typescript": "^5.8.2"
+    "esbuild": "^0.25.0"
   }
 }
