@@ -1,12 +1,12 @@
 import { parentPort, workerData } from 'worker_threads';
 
-const { name, raceLength, sharedBuffer } = workerData;
-const raceOverFlag = new Int32Array(sharedBuffer);
-let distance = 0;
-
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const run = async () => {
+parentPort?.on('message', async (workerData) => {
+    const { name, raceLength, sharedBuffer } = workerData;
+    const raceOverFlag = new Int32Array(sharedBuffer);
+    let distance = 0;
+
     while (distance < raceLength && Atomics.load(raceOverFlag, 0) === 0) {
         distance += Math.floor(Math.random() * 10) + 1; // 隨機增加距離
 
@@ -20,6 +20,4 @@ const run = async () => {
             await sleep(100); // 繼續跑
         }
     }
-};
-
-run();
+});
