@@ -6,11 +6,17 @@ const numCores = cpus().length;
 const raceOverFlag = new Int32Array(new SharedArrayBuffer(4));
 const workerFile = resolve(__dirname, './workers/race.js'); // Reference JavaScript file
 
-class WorkerPool {
+export class WorkerPool {
     private workers: Worker[] = [];
     private availableWorkers: Worker[] = [];
+    private onTotalWorkersChange: (totalWorkers: number) => void = () => { };
+    private onAvailableWorkersChange: (availableWorkers: number) => void = () => { };
 
-    constructor() {
+    constructor(onAvailableWorkersChange?: (availableWorkers: number) => void) {
+        if (onAvailableWorkersChange) {
+            this.onAvailableWorkersChange = onAvailableWorkersChange;
+        }
+
         for (let i = 0; i < numCores; i++) {
             const worker = new Worker(workerFile);
             worker.on('message', (message) => this.handleMessage(worker, message));
@@ -19,10 +25,13 @@ class WorkerPool {
                 if (code !== 0) {
                     console.error(`❌ Worker stopped with exit code ${code}`);
                 }
-                this.removeWorker(worker);
+                this.markWorkerAsAvailable(worker);
             });
             this.workers.push(worker);
             this.availableWorkers.push(worker);
+            this.onTotalWorkersChange(this.workers.length);
+            this.onAvailableWorkersChange(this.availableWorkers.length);
+            console.log(`👷 Worker created: (${this.workers.length}|${this.availableWorkers.length})`);
         }
     }
 
@@ -37,12 +46,14 @@ class WorkerPool {
         } else {
             console.log(`🚀 ${name} 跑了 ${distance} 公尺`);
         }
-        this.availableWorkers.push(worker); // Mark worker as available
+        this.markWorkerAsAvailable(worker); // Mark worker as available
     }
 
-    private removeWorker(worker: Worker) {
-        this.workers = this.workers.filter(w => w !== worker);
-        this.availableWorkers = this.availableWorkers.filter(w => w !== worker);
+    private markWorkerAsAvailable(worker: Worker) {
+        if (!this.availableWorkers.includes(worker)) {
+            this.availableWorkers.push(worker);
+            this.onAvailableWorkersChange(this.availableWorkers.length);
+        }
     }
 
     public runTask(workerData: any) {
@@ -51,7 +62,22 @@ class WorkerPool {
         }
         const worker = this.availableWorkers.pop();
         worker?.postMessage(workerData);
+        this.onAvailableWorkersChange(this.availableWorkers.length);
+    }
+
+    public getTotalWorkers(): number {
+        return this.workers.length;
+    }
+
+    public getAvailableWorkers(): number {
+        return this.availableWorkers.length;
+    }
+
+    public setTotalWorkersChangeCallback(callback: (totalWorkers: number) => void) {
+        this.onTotalWorkersChange = callback;
+    }
+
+    public setAvailableWorkersChangeCallback(callback: (availableWorkers: number) => void) {
+        this.onAvailableWorkersChange = callback;
     }
 }
-
-export const workerPool = new WorkerPool();

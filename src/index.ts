@@ -1,4 +1,4 @@
-import { workerPool } from './workerPool';
+import { WorkerPool } from './workerPool';
 
 const raceLength = 100; // 比賽距離
 const sharedBuffer = new SharedArrayBuffer(4); // 共享變數
@@ -11,8 +11,15 @@ const players = [
     { name: 'Ｃ' }
 ];
 
-console.log("🏁 比賽開始！");
+const workersPool = new WorkerPool((availableWorkers: any) => {
+    console.log(`Available workers: ${availableWorkers}`);
+});
 
+workersPool.setTotalWorkersChangeCallback((totalWorkers: any) => {
+    console.log(`Total workers: ${totalWorkers}`);
+});
+
+console.log("🏁 比賽開始！");
 players.forEach(horse => {
-    workerPool.runTask({ name: horse.name, raceLength, sharedBuffer });
+    workersPool.runTask({ name: horse.name, raceLength, sharedBuffer });
 });
