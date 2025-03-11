@@ -1,12 +1,10 @@
 {
   "name": "js-worker-multi-threading",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "build": "esbuild src/index.ts src/workers/hourseRace.ts --outdir=dist --platform=node --format=esm",
-    "build:watch": "esbuild src/index.ts src/workers/hourseRace.ts --outdir=dist --platform=node --format=esm",
+    "build": "node build.js",
     "start": "node dist/index.js",
-    "dev": "npm run build:watch && npm run start"
+    "dev": "npm run build && npm run start"
   },
   "keywords": [],
   "author": "",
