@@ -12,13 +12,15 @@ const players = [
 ];
 
 const workersPool = new WorkerPool((availableWorkers: any) => {
-    console.log(`Available workers: ${availableWorkers}`);
+    console.log(`👷 Available Workers: ${availableWorkers}`);
 });
 
 workersPool.setTotalWorkersChangeCallback((totalWorkers: any) => {
     console.log(`Total workers: ${totalWorkers}`);
 });
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+sleep(1000);
 console.log("🏁 比賽開始！");
 players.forEach(horse => {
     workersPool.runTask({ name: horse.name, raceLength, sharedBuffer });

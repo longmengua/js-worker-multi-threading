@@ -31,7 +31,7 @@ export class WorkerPool {
             this.availableWorkers.push(worker);
             this.onTotalWorkersChange(this.workers.length);
             this.onAvailableWorkersChange(this.availableWorkers.length);
-            console.log(`👷 Worker created: (${this.workers.length}|${this.availableWorkers.length})`);
+            console.log(`Totoal Workers: ${this.workers.length}`);
         }
     }
 
@@ -58,7 +58,7 @@ export class WorkerPool {
 
     public runTask(workerData: any) {
         if (this.availableWorkers.length === 0) {
-            throw new Error('No available workers');
+            throw new Error('👷 No available worker');
         }
         const worker = this.availableWorkers.pop();
         worker?.postMessage(workerData);

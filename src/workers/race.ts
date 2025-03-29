@@ -8,7 +8,7 @@ parentPort?.on('message', async (workerData) => {
     let distance = 0;
 
     while (distance < raceLength && Atomics.load(raceOverFlag, 0) === 0) {
-        distance += Math.floor(Math.random() * 10) + 1; // 隨機增加距離
+        distance += 10; // 增加距離
 
         if (distance >= raceLength) {
             distance = raceLength;
@@ -17,7 +17,7 @@ parentPort?.on('message', async (workerData) => {
         parentPort?.postMessage({ name, distance });
 
         if (distance < raceLength) {
-            await sleep(100); // 繼續跑
+            await sleep(1); // 繼續跑
         }
     }
 });
