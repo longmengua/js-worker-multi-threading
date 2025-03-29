@@ -22,6 +22,19 @@ workersPool.setTotalWorkersChangeCallback((totalWorkers: any) => {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 sleep(1000);
 console.log("🏁 比賽開始！");
+
+function handleMessage(worker: Worker, message: any) {
+    const { name, distance } = message;
+    if (Atomics.load(raceOverFlag, 0) === 1) {
+        return; // 比賽已經結束
+    }
+    if (distance == 100) {
+        console.log(`🏆 ${name} 贏得比賽！`);
+        Atomics.store(raceOverFlag, 0, 1); // 設置比賽結束標誌
+    } else {
+        console.log(`🚀 ${name} 跑了 ${distance} 公尺`);
+    }
+}
 players.forEach(horse => {
-    workersPool.runTask({ name: horse.name, raceLength, sharedBuffer });
+    workersPool.runTask({ name: horse.name, raceLength, sharedBuffer }, handleMessage);
 });

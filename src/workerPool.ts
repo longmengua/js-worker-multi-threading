@@ -19,34 +19,12 @@ export class WorkerPool {
 
         for (let i = 0; i < numCores; i++) {
             const worker = new Worker(workerFile);
-            worker.on('message', (message) => this.handleMessage(worker, message));
-            worker.on('error', (err) => console.error(`❌ Worker error: ${err.message}`));
-            worker.on('exit', (code) => {
-                if (code !== 0) {
-                    console.error(`❌ Worker stopped with exit code ${code}`);
-                }
-                this.markWorkerAsAvailable(worker);
-            });
             this.workers.push(worker);
             this.availableWorkers.push(worker);
             this.onTotalWorkersChange(this.workers.length);
             this.onAvailableWorkersChange(this.availableWorkers.length);
             console.log(`Totoal Workers: ${this.workers.length}`);
         }
-    }
-
-    private handleMessage(worker: Worker, message: any) {
-        const { name, distance } = message;
-        if (Atomics.load(raceOverFlag, 0) === 1) {
-            return; // 比賽已經結束
-        }
-        if (distance == 100) {
-            console.log(`🏆 ${name} 贏得比賽！`);
-            Atomics.store(raceOverFlag, 0, 1); // 設置比賽結束標誌
-        } else {
-            console.log(`🚀 ${name} 跑了 ${distance} 公尺`);
-        }
-        this.markWorkerAsAvailable(worker); // Mark worker as available
     }
 
     private markWorkerAsAvailable(worker: Worker) {
@@ -56,11 +34,38 @@ export class WorkerPool {
         }
     }
 
-    public runTask(workerData: any) {
-        if (this.availableWorkers.length === 0) {
-            throw new Error('👷 No available worker');
+    private getWorker() {
+        let worker: any = undefined;
+        while (this.availableWorkers.length > 0) {
+            worker = this.availableWorkers.pop();
+            if (worker) {
+                return worker
+            }
         }
-        const worker = this.availableWorkers.pop();
+        throw new Error('👷 No available worker');
+    }
+
+    /***
+     * in order to make this worker pool logic clean 
+     * function handleMessage, which processing biz logic will be injected
+    */
+    public runTask(workerData: any, handleMessage?: any) {
+        const worker = this.getWorker();
+        worker.on('message', (message: any) => {
+            try {
+                handleMessage && handleMessage(worker, message)
+            } catch (e) {
+                console.log(e);
+            }
+            this.markWorkerAsAvailable(worker); // Mark worker as available
+        });
+        worker.on('error', (err: { message: any; }) => console.error(`❌ Worker error: ${err.message}`));
+        worker.on('exit', (code: number) => {
+            if (code !== 0) {
+                console.error(`❌ Worker stopped with exit code ${code}`);
+            }
+            this.markWorkerAsAvailable(worker);
+        });
         worker?.postMessage(workerData);
         this.onAvailableWorkersChange(this.availableWorkers.length);
     }
